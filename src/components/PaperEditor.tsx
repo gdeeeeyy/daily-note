@@ -11,29 +11,19 @@ export default function PaperEditor() {
   const [fontFamily, setFontFamily] = useState("serif");
   const [date, setDate] = useState("");
 
-  // Load latest paper (optional - if you still want to fetch `singleton-paper`)
-  useEffect(() => {
-    const fetchContent = async () => {
-      const { data } = await supabase.from("paper_content").select("*").eq("id", "singleton-paper").single();
-      if (data) {
-        setText(data.text);
-        setFontSize(data.font_size);
-        setFontColor(data.font_color);
-        setFontFamily(data.font_family);
-        setDate(data.date || "");
-      }
-    };
-    fetchContent();
-  }, []);
-
-  const generateRandomId = () => Math.floor(100000 + Math.random() * 900000); // 6-digit random number
-
-  // Save button
   const handleSave = async () => {
-    const randomId = generateRandomId();
+    // Get latest ID
+    const { data: latest, error: fetchError } = await supabase
+      .from("paper_content")
+      .select("id")
+      .order("id", { ascending: false })
+      .limit(1)
+      .single();
+
+    const newId = latest?.id ? latest.id + 1 : 1;
 
     const { error } = await supabase.from("paper_content").insert({
-      id: randomId,
+      id: newId,
       text,
       font_size: fontSize,
       font_color: fontColor,
@@ -42,10 +32,10 @@ export default function PaperEditor() {
     });
 
     if (error) {
-      console.error("Failed to save paper content:", error.message);
-      alert("Failed to save paper content.");
+      console.error("Save failed:", error.message);
+      alert("Save failed.");
     } else {
-      alert(`Content saved with ID: ${randomId}`);
+      alert("Saved successfully!");
     }
   };
 
@@ -57,18 +47,22 @@ export default function PaperEditor() {
         onChange={(e) => setText(e.target.value)}
         placeholder="Type your letter here..."
       />
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap items-center">
         <input
           type="number"
           value={fontSize}
           onChange={(e) => setFontSize(+e.target.value)}
-          className="border p-1 w-24"
+          className="border p-1 w-20"
         />
-        <input type="color" value={fontColor} onChange={(e) => setFontColor(e.target.value)} />
+        <input
+          type="color"
+          value={fontColor}
+          onChange={(e) => setFontColor(e.target.value)}
+        />
         <select
           value={fontFamily}
           onChange={(e) => setFontFamily(e.target.value)}
-          className="border p-1 w-32"
+          className="border p-1"
         >
           <option value="serif">Serif</option>
           <option value="sans-serif">Sans-serif</option>
@@ -76,10 +70,10 @@ export default function PaperEditor() {
         </select>
         <input
           type="text"
-          placeholder="Date (e.g. 2025-06-05)"
+          placeholder="Enter date (YYYY-MM-DD)"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="border p-1 w-48"
+          className="border p-1 w-40"
         />
         <button
           onClick={handleSave}
@@ -88,7 +82,13 @@ export default function PaperEditor() {
           Save
         </button>
       </div>
-      <PaperScene text={text} fontSize={fontSize} fontColor={fontColor} fontFamily={fontFamily} />
+      <PaperScene
+        text={text}
+        fontSize={fontSize}
+        fontColor={fontColor}
+        fontFamily={fontFamily}
+        date={date}
+      />
     </div>
   );
 }

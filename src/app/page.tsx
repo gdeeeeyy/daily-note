@@ -14,11 +14,11 @@ export default function HomePage() {
     font_size: number;
     font_color: string;
     font_family: string;
-    date?: string;
+    date: string;
   } | null>(null);
 
   useEffect(() => {
-    const fetchLatest = async () => {
+    const fetchContent = async () => {
       const { data, error } = await supabase
         .from("paper_content")
         .select("*")
@@ -32,13 +32,13 @@ export default function HomePage() {
           font_size: data.font_size,
           font_color: data.font_color,
           font_family: data.font_family,
-          date: data.date ?? "",
+          date: data.date,
         });
       }
     };
 
     if (role === "Hemthiii") {
-      fetchLatest();
+      fetchContent();
     }
   }, [role]);
 
@@ -68,7 +68,7 @@ export default function HomePage() {
           />
           <button
             onClick={handleLogin}
-            className="w-full bg-blue-500 text-white rounded p-2 hover:bg-blue-600"
+            className="w-full bg-blue-500 text-white rounded p- hover:bg-blue-600"
           >
             Login
           </button>
@@ -84,17 +84,13 @@ export default function HomePage() {
         <PaperEditor />
       ) : (
         paperData && (
-          <>
-            <div className="mb-4 text-sm text-gray-700">
-              <strong>Date:</strong> {paperData.date || "No date set"}
-            </div>
-            <PaperScene
-              text={paperData.text}
-              fontSize={paperData.font_size}
-              fontColor={paperData.font_color}
-              fontFamily={paperData.font_family}
-            />
-          </>
+          <PaperScene
+            text={paperData.text}
+            fontSize={paperData.font_size}
+            fontColor={paperData.font_color}
+            fontFamily={paperData.font_family}
+            date={paperData.date}
+          />
         )
       )}
     </main>

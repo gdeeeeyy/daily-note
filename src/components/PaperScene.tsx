@@ -1,67 +1,157 @@
-"use client";
+'use client';
 
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import * as THREE from "three";
-import { useEffect, useRef, useState } from "react";
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import * as THREE from 'three';
+import { useEffect, useState } from 'react';
 
-type PaperProps = {
-  texture: THREE.Texture;
-};
-
-function Paper({ texture }: PaperProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  return (
-    <mesh ref={meshRef} position={[0, 0, 0]}>
-      <planeGeometry args={[2.5, 2.5]} />
-      <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
-    </mesh>
-  );
-}
-
-function generateCanvasTexture(
+function createSquareWrappedCanvasTexture(
   text: string,
-  fontSize: number,
+  baseFontSize: number,
   fontColor: string,
-  fontFamily: string
-): THREE.Texture {
-  const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 1024;
-  const ctx = canvas.getContext("2d")!;
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  fontFamily: string,
+  date: string
+) {
+  const width = 800;
+  const height = 800;
+  const margin = 40;
+  const maxHeight = height - margin * 2 - 30;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#d9d9d9';
+  ctx.fillRect(0, 0, width, height);
 
   ctx.fillStyle = fontColor;
-  ctx.font = `${fontSize}px ${fontFamily}`;
+  ctx.textBaseline = 'top';
+  ctx.font = `${baseFontSize}px ${fontFamily}`;
 
-  const lines = text.split("\n");
-  lines.forEach((line, i) => ctx.fillText(line, 50, 80 + i * (fontSize + 10)));
+  const maxTextWidth = width - margin * 2;
 
-  return new THREE.CanvasTexture(canvas);
+  function wrapText(text: string, maxWidth: number) {
+    const words = text.split(' ');
+    let lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? currentLine + ' ' + word : word;
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  }
+
+  let fontSize = baseFontSize;
+  let lines = wrapText(text, maxTextWidth);
+  let lineHeight = fontSize * 1.3;
+
+  while (lines.length * lineHeight > maxHeight && fontSize > 10) {
+    fontSize -= 1;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    lines = wrapText(text, maxTextWidth);
+    lineHeight = fontSize * 1.3;
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], margin, margin + i * lineHeight);
+  }
+
+  if (date) {
+    ctx.font = `12px ${fontFamily}`;
+    ctx.fillText(`Date: ${date}`, margin, height - 25);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+
+  return { texture, width, height };
 }
 
-type PaperSceneProps = {
+function PaperPlaneFixed({
+  text,
+  fontSize,
+  fontColor,
+  fontFamily,
+  date,
+}: {
   text: string;
   fontSize: number;
   fontColor: string;
   fontFamily: string;
-};
-
-export default function PaperScene({ text, fontSize, fontColor, fontFamily }: PaperSceneProps) {
-  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+  date: string;
+}) {
+  const [textureData, setTextureData] = useState<{
+    texture: THREE.Texture;
+    width: number;
+    height: number;
+  } | null>(null);
 
   useEffect(() => {
-    const tex = generateCanvasTexture(text, fontSize, fontColor, fontFamily);
-    setTexture(tex);
-  }, [text, fontSize, fontColor, fontFamily]);
+    const data = createSquareWrappedCanvasTexture(
+      text,
+      fontSize,
+      fontColor,
+      fontFamily,
+      date
+    );
+    setTextureData(data);
+  }, [text, fontSize, fontColor, fontFamily, date]);
+
+  if (!textureData) return null;
+
+  const scale = 0.0025;
+  const planeWidth = textureData.width * scale;
+  const planeHeight = textureData.height * scale;
 
   return (
-    <Canvas style={{ width: "100%", height: "500px" }}>
-      <ambientLight />
-      <OrbitControls enableZoom />
-      {texture && <Paper texture={texture} />}
-    </Canvas>
+    <mesh>
+      <planeGeometry args={[planeWidth, planeHeight]} />
+      <meshBasicMaterial
+        map={textureData.texture}
+        side={THREE.DoubleSide}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+export default function PaperScene({
+  text,
+  fontSize,
+  fontColor,
+  fontFamily,
+  date,
+}: {
+  text: string;
+  fontSize: number;
+  fontColor: string;
+  fontFamily: string;
+  date: string;
+}) {
+  return (
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <Canvas camera={{ position: [0, 0, 2.5], fov: 50 }}>
+        <ambientLight />
+        <PaperPlaneFixed
+          text={text}
+          fontSize={fontSize}
+          fontColor={fontColor}
+          fontFamily={fontFamily}
+          date={date}
+        />
+        <OrbitControls enableZoom={true} enablePan={true} />
+      </Canvas>
+    </div>
   );
 }
