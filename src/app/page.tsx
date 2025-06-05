@@ -14,14 +14,16 @@ export default function HomePage() {
     font_size: number;
     font_color: string;
     font_family: string;
+    date?: string;
   } | null>(null);
 
   useEffect(() => {
-    const fetchContent = async () => {
+    const fetchLatest = async () => {
       const { data, error } = await supabase
         .from("paper_content")
         .select("*")
-        .eq("id", "singleton-paper")
+        .order("id", { ascending: false })
+        .limit(1)
         .single();
 
       if (!error && data) {
@@ -30,12 +32,13 @@ export default function HomePage() {
           font_size: data.font_size,
           font_color: data.font_color,
           font_family: data.font_family,
+          date: data.date ?? "",
         });
       }
     };
 
     if (role === "Hemthiii") {
-      fetchContent();
+      fetchLatest();
     }
   }, [role]);
 
@@ -81,12 +84,17 @@ export default function HomePage() {
         <PaperEditor />
       ) : (
         paperData && (
-          <PaperScene
-            text={paperData.text}
-            fontSize={paperData.font_size}
-            fontColor={paperData.font_color}
-            fontFamily={paperData.font_family}
-          />
+          <>
+            <div className="mb-4 text-sm text-gray-700">
+              <strong>Date:</strong> {paperData.date || "No date set"}
+            </div>
+            <PaperScene
+              text={paperData.text}
+              fontSize={paperData.font_size}
+              fontColor={paperData.font_color}
+              fontFamily={paperData.font_family}
+            />
+          </>
         )
       )}
     </main>
