@@ -33,7 +33,7 @@ function createSquareWrappedCanvasTexture(
 
   function wrapText(text: string, maxWidth: number) {
     const words = text.split(' ');
-    let lines: string[] = [];
+    const lines: string[] = [];
     let currentLine = '';
 
     for (const word of words) {

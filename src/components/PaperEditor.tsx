@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react"; // Removed unused useEffect
 import PaperScene from "./PaperScene";
 import { supabase } from "../lib/supabaseClient";
 
@@ -12,8 +12,7 @@ export default function PaperEditor() {
   const [date, setDate] = useState("");
 
   const handleSave = async () => {
-    // Get latest ID
-    const { data: latest, error: fetchError } = await supabase
+    const { data: latest } = await supabase
       .from("paper_content")
       .select("id")
       .order("id", { ascending: false })
