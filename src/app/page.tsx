@@ -1,44 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import PaperEditor from "@/components/PaperEditor";
-import PaperScene from "@/components/PaperScene";
-import { supabase } from "@/lib/supabaseClient";
 
 export default function HomePage() {
   const [role, setRole] = useState<"Krishna" | "Hemthiii" | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [paperData, setPaperData] = useState<{
-    text: string;
-    font_size: number;
-    font_color: string;
-    font_family: string;
-    date: string;
-  } | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchContent = async () => {
-      const { data, error } = await supabase
-        .from("paper_content")
-        .select("*")
-        .order("id", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (!error && data) {
-        setPaperData({
-          text: data.text,
-          font_size: data.font_size,
-          font_color: data.font_color,
-          font_family: data.font_family,
-          date: data.date,
-        });
-      }
-    };
-
     if (role === "Hemthiii") {
-      fetchContent();
+      router.push("/hemthiii");
     }
   }, [role]);
 
@@ -56,19 +30,20 @@ export default function HomePage() {
 
   if (!role) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-neutral-100 text-black">
-        <div className="bg-white p-6 rounded shadow w-full max-w-md space-y-4">
-          <h1 className="text-xl font-semibold">Login to View Paper</h1>
+      <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md space-y-5 border border-gray-200 text-center">
+          <h1 className="text-2xl font-semibold">Login to read your letter for todaayyy my sunshineeee☀️💖</h1>
+
           <input
             type="password"
             placeholder="Enter password..."
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded p-2"
+            className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200 outline-none"
           />
           <button
             onClick={handleLogin}
-            className="w-full bg-blue-500 text-white rounded p- hover:bg-blue-600"
+            className="w-full bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700 transition"
           >
             Login
           </button>
@@ -79,20 +54,8 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen p-6 bg-neutral-100 text-black">
-      {role === "Krishna" ? (
-        <PaperEditor />
-      ) : (
-        paperData && (
-          <PaperScene
-            text={paperData.text}
-            fontSize={paperData.font_size}
-            fontColor={paperData.font_color}
-            fontFamily={paperData.font_family}
-            date={paperData.date}
-          />
-        )
-      )}
+    <main className="min-h-screen p-6 bg-gray-100 text-black text-center">
+      {role === "Krishna" && <PaperEditor />}
     </main>
   );
 }
