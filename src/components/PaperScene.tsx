@@ -13,7 +13,9 @@ function createCanvasTexture(
   date: string,
   imageUrl?: string,
   imageWidthPercent = 100,
-  imageHeightPercent = 100
+  imageHeightPercent = 100,
+  imageOffsetX = 0,
+  imageOffsetY = 0
 ): Promise<{ texture: THREE.Texture; width: number; height: number }> {
   return new Promise((resolve) => {
     const width = 800;
@@ -83,8 +85,10 @@ function createCanvasTexture(
       img.onload = () => {
         const imgWidth = (width - margin * 2) * (imageWidthPercent / 100);
         const imgHeight = (imageAreaHeight - 30) * (imageHeightPercent / 100);
-        const x = margin + (width - margin * 2 - imgWidth) / 2;
-        const y = height - imageAreaHeight + (imageAreaHeight - imgHeight) / 2;
+
+        const x = margin + ((width - margin * 2 - imgWidth) / 2) + imageOffsetX;
+        const y = height - imageAreaHeight + ((imageAreaHeight - imgHeight) / 2) + imageOffsetY;
+
         ctx.drawImage(img, x, y, imgWidth, imgHeight);
         finalize();
       };
@@ -107,6 +111,8 @@ function PaperPlane({
   imageUrl,
   imageWidthPercent,
   imageHeightPercent,
+  imageOffsetX,
+  imageOffsetY,
 }: {
   text: string;
   fontSize: number;
@@ -116,6 +122,8 @@ function PaperPlane({
   imageUrl?: string;
   imageWidthPercent?: number;
   imageHeightPercent?: number;
+  imageOffsetX?: number;
+  imageOffsetY?: number;
 }) {
   const [textureData, setTextureData] = useState<{
     texture: THREE.Texture;
@@ -132,7 +140,9 @@ function PaperPlane({
       date,
       imageUrl,
       imageWidthPercent,
-      imageHeightPercent
+      imageHeightPercent,
+      imageOffsetX,
+      imageOffsetY
     ).then((data) => setTextureData(data));
   }, [
     text,
@@ -143,6 +153,8 @@ function PaperPlane({
     imageUrl,
     imageWidthPercent,
     imageHeightPercent,
+    imageOffsetX,
+    imageOffsetY,
   ]);
 
   if (!textureData) return null;
@@ -172,6 +184,8 @@ export default function PaperScene({
   imageUrl,
   imageWidthPercent = 100,
   imageHeightPercent = 100,
+  imageOffsetX = 0,
+  imageOffsetY = 0,
 }: {
   text: string;
   fontSize: number;
@@ -181,10 +195,12 @@ export default function PaperScene({
   imageUrl?: string;
   imageWidthPercent?: number;
   imageHeightPercent?: number;
+  imageOffsetX?: number;
+  imageOffsetY?: number;
 }) {
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#e5e5e5' }}>
-      <Canvas camera={{ position: [0, 0, 2], fov: 40 }}>
+    <div style={{ width: '100%', height: '100vh' }}>
+      <Canvas camera={{ position: [0, 0, 1], fov: 40 }}>
         <ambientLight />
         <PaperPlane
           text={text}
@@ -195,6 +211,8 @@ export default function PaperScene({
           imageUrl={imageUrl}
           imageWidthPercent={imageWidthPercent}
           imageHeightPercent={imageHeightPercent}
+          imageOffsetX={imageOffsetX}
+          imageOffsetY={imageOffsetY}
         />
         <OrbitControls enableZoom enablePan />
       </Canvas>
