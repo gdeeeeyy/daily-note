@@ -14,7 +14,7 @@ export default function HomePage() {
     if (role === "Hemthiii") {
       router.push("/hemthiii");
     }
-  }, [role]);
+  }, [role, router]); // ✅ added router to dependency array
 
   const handleLogin = () => {
     if (password === "sunflower") {
@@ -32,7 +32,9 @@ export default function HomePage() {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md space-y-5 border border-gray-200 text-center">
-          <h1 className="text-2xl font-semibold">Login to read your letter for todaayyy my sunshineeee☀️💖</h1>
+          <h1 className="text-2xl font-semibold">
+            Login to read your letter for todaayyy my sunshineeee☀️💖
+          </h1>
 
           <input
             type="password"

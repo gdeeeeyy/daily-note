@@ -21,7 +21,8 @@
     "react-pdf": "^10.1.0",
     "react-reader": "^2.0.13",
     "three": "^0.177.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "xmldom": "^0.6.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
