@@ -1,44 +1,42 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
 
-export default function HemthiiiDashboard() {
-  const [entries, setEntries] = useState<{ id: number; date: string }[]>([]);
+export default function HemthiiiHome() {
+  const [letters, setLetters] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchEntries = async () => {
+    const fetchLetters = async () => {
       const { data, error } = await supabase
-        .from('paper_content')
-        .select('id, date')
-        .order('id', { ascending: false });
+        .from("paper_content")
+        .select("id, date")
+        .order("id", { ascending: false });
 
       if (!error && data) {
-        setEntries(data);
+        setLetters(data);
       }
     };
-
-    fetchEntries();
+    fetchLetters();
   }, []);
 
   return (
-    <div className="min-h-screen px-6 py-8 text-center">
-      <div className="max-w-3xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold">Letters for myyy prettyy littleee baabbbyyyyy❤️😘</h1>
+    <div className="min-h-screen bg-gray-100 p-6 relative">
+      <h1 className="text-2xl font-bold mb-6 text-center">All Letters</h1>
 
-        <div className="grid gap-4">
-          {entries.map(({ id, date }) => (
+      <ul className="space-y-3 text-center">
+        {letters.map((letter) => (
+          <li key={letter.id}>
             <Link
-              key={id}
-              href={`/hemthiii/${id}`}
-              className="block mx-auto w-full max-w-xl rounded-lg bg-white shadow-md p-4 hover:bg-blue-50 transition-all border border-gray-200"
+              href={`/hemthiii/${letter.id}`}
+              className="block py-2 px-4 bg-white rounded shadow hover:bg-gray-200"
             >
-              <div className="text-lg font-semibold">Letter - {id} | {date}</div>
+              Letter – {letter.id} | {letter.date}
             </Link>
-          ))}
-        </div>
-      </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

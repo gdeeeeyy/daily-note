@@ -1,13 +1,18 @@
-// layout.tsx
-import './globals.css';
-import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
+// src/app/layout.tsx
+import "./globals.css";
+import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
+import FloatingBookButton from "@/components/FloatingBookButton";
 
-const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600'], display: 'swap' });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: 'Interactive Paper',
-  description: 'Editable 3D paper with login interface',
+  title: "Interactive Paper",
+  description: "Editable 3D paper with login interface",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -15,6 +20,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <div className={`${poppins.className} bg-gray-100 text-gray-900 min-h-screen`}>
+          {/* Floating button is now a client component */}
+          <FloatingBookButton />
           {children}
         </div>
       </body>
