@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import PaperScene from "@/components/PaperScene";
 import Link from "next/link";
 
 // Define a type for the paper data
@@ -45,7 +44,7 @@ export default function LetterViewer() {
   if (!paperData) return <p className="p-6">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 text-center relative">
+    <div className="min-h-screen bg-gray-200 flex flex-col items-center p-4">
       <Link
         href="/hemthiii"
         className="inline-block mt-6 mb-4 text-blue-600 hover:underline text-sm"
@@ -53,18 +52,47 @@ export default function LetterViewer() {
         ← Back to All Letters
       </Link>
 
-      <PaperScene
-        text={paperData.text}
-        fontSize={paperData.font_size}
-        fontColor={paperData.font_color}
-        fontFamily={paperData.font_family}
-        date={paperData.date}
-        imageUrl={paperData.image_url ?? undefined}
-        imageWidthPercent={paperData.image_width_percent ?? 100}
-        imageHeightPercent={paperData.image_height_percent ?? 100}
-        imageOffsetX={paperData.image_offset_x ?? 0}
-        imageOffsetY={paperData.image_offset_y ?? 0}
-      />
+      {/* Paper Container */}
+      <div
+        className="w-full max-w-3xl p-8 rounded-lg shadow-lg border border-gray-300 relative"
+        style={{
+          backgroundColor: "#ffffff",
+          fontFamily: paperData.font_family,
+          fontSize: `${paperData.font_size}px`,
+          color: paperData.font_color,
+          lineHeight: "1.5", // optional: slightly bigger spacing for readability
+          minHeight: "auto",
+          background: `
+            /* Red margin line */
+            linear-gradient(to right, #ff4d4d 2px, transparent 0) 50px 0 / 2px 100% no-repeat,
+            /* Horizontal lines with increased spacing */
+            repeating-linear-gradient(to bottom, #ffffff 0, #ffffff 39px, #cce0ff 40px)
+          `,
+          paddingLeft: "60px", // leave space for red margin
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        <h1 className="text-2xl font-bold mb-4">{`Letter - ${id}`}</h1>
+
+        <p>{paperData.text}</p>
+
+        {paperData.image_url && (
+          <img
+            src={paperData.image_url}
+            alt="Inserted Image"
+            style={{
+              width: `${paperData.image_width_percent ?? 100}%`,
+              height: `${paperData.image_height_percent ?? "auto"}`,
+              display: "block",
+              marginLeft: `${paperData.image_offset_x ?? "0"}px`,
+              marginTop: `${paperData.image_offset_y ?? "20"}px`,
+              marginBottom: "20px",
+            }}
+          />
+        )}
+
+        <p className="mt-6 text-right text-sm text-gray-500">{paperData.date}</p>
+      </div>
     </div>
   );
 }
