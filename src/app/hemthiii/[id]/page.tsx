@@ -6,9 +6,23 @@ import { supabase } from "@/lib/supabaseClient";
 import PaperScene from "@/components/PaperScene";
 import Link from "next/link";
 
+// Define a type for the paper data
+type PaperData = {
+  text: string;
+  font_size: number;
+  font_color: string;
+  font_family: string;
+  date: string;
+  image_url?: string | null;
+  image_width_percent?: number | null;
+  image_height_percent?: number | null;
+  image_offset_x?: number | null;
+  image_offset_y?: number | null;
+};
+
 export default function LetterViewer() {
   const { id } = useParams();
-  const [paperData, setPaperData] = useState<any | null>(null);
+  const [paperData, setPaperData] = useState<PaperData | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,11 +33,12 @@ export default function LetterViewer() {
         .single();
 
       if (!error && data) {
-        setPaperData(data);
+        setPaperData(data as PaperData);
       } else {
         console.error("Error loading paper:", error);
       }
     };
+
     fetchData();
   }, [id]);
 
@@ -44,11 +59,11 @@ export default function LetterViewer() {
         fontColor={paperData.font_color}
         fontFamily={paperData.font_family}
         date={paperData.date}
-        imageUrl={paperData.image_url}
-        imageWidthPercent={paperData.image_width_percent || 100}
-        imageHeightPercent={paperData.image_height_percent || 100}
-        imageOffsetX={paperData.image_offset_x || 0}
-        imageOffsetY={paperData.image_offset_y || 0}
+        imageUrl={paperData.image_url ?? undefined}
+        imageWidthPercent={paperData.image_width_percent ?? 100}
+        imageHeightPercent={paperData.image_height_percent ?? 100}
+        imageOffsetX={paperData.image_offset_x ?? 0}
+        imageOffsetY={paperData.image_offset_y ?? 0}
       />
     </div>
   );
